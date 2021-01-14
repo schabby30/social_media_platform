@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <title>Newsfeed</title>
+        <script type="text/javascript" th:src="@{/app.js}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+        <style>
+            /* The popup */
+            .popup .popuptext {
+              visibility: hidden;
+              width: 160px;
+              background-color: #555;
+              color: #fff;
+              text-align: center;
+              border-radius: 6px;
+              padding: 8px 0;
+              position: absolute;
+              z-index: 5;
+              bottom: 125%;
+              left: 50%;
+              margin-left: -80px;
+            }
+
+            /* Toggle this class - hide and show the popup */
+            .popup .show {
+              visibility: visible;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div style="height: 95vh; width: 100%; min-width: 830px; background-color: #00b0000f; font-family: Ink Free; font-size: 22px; overflow: hidden">
+            <div style="width:25%; min-width: 240px; height: 100%; float:left; border-right: solid; border-width: 1px; text-align: center">
+                <div style="border-bottom: solid; border-width: 1px; margin: 20px 0px 20px 0px; padding: 20px">
+                    <img th:src="${user.picture}" alt="profile_picture" width="150px" height="120px" style="display:block; margin-left:auto; margin-right: auto"/>
+                    <a th:href="@{/profil/{user_id}/{user_id} (user_id=${user.id})}">Profilod</a>
+                </div>
+                <div style="width: 100%; margin: 20px 0px 20px 0px; padding: 20px; font-weight: bold">
+                    Online emberek
+                    <div id="chatRequest"></div>
+                    <table style="margin: 20px auto 20px auto; padding: 20px; font-weight: normal; border-collapse: separate; border-spacing: 10px 15px">
+                        <tr th:each="u : ${users}">
+                            <td th:text="${u.name}" style="margin: 50px; padding: 10px; cursor: pointer; 
+                                background-color: #1ab01a30; border-radius: 10px; box-shadow: 3px 3px 5px 3px  #006400A3" 
+                                th:onclick="|window.location.href='/profil/${user.id}/${u.id}'|">
+                            </td>
+                            <td th:id="${u.username}">
+                                <script th:inline="javascript">
+
+                                    var from = /*[[${user.id}]]*/ '';
+                                    var to = /*[[${u.id}]]*/ '';
+                                    var tagId = /*[[${u.username}]]*/ '';
+                                    createChatButton(from, to, tagId);
+
+                                </script>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </div>
+                <div id="invite"></div>
+            </div>
+            <div style="width:70%; min-width: 520px; height: 90vh; float:right">
+                <div>
+                    <div style="height: 20px; text-align: right; padding: 20px; margin-top: 20px">
+                        <label style="display: block; float: left; width: 80%; text-align: center; font-size: 36px; font-weight: bold">HÍRFOLYÓ</label>
+                        <a th:href="@{/logout?id={user_id} (user_id=${user.id})}" style="display: block; float: right; width: 20%">Kilépek</a>
+                    </div>
+                    <div style="margin: 30px 20px 20px 20px; width: 90%; max-width: 800px; background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3">
+                        <div style="padding: 20px 0px 0px 20px; width: 90%">
+                            Ide írhatod, ami nyomja a kis lelked, kedves 
+                            <span id="userName" th:text="${user.name}" style="font-weight: bold"></span>
+                        </div>
+                        <form action="#" th:action="@{/posting/{user_id} (user_id=${user.id})}" th:object="${post}" method="POST">
+                            <p style="padding: 0px 0px 0px 20px">Az van, hogy... 
+                                <input type="text" th:field="*{text}" required="true" 
+                                       style="font-family: Ink Free; font-size: 20px; height: 30px; width: 60%; padding: 5px; font-size: 26px"/>
+                            </p>
+                            <p style="padding: 0px 0px 20px 20px">
+                                <input type="submit" value="Közhírré teszem" style="font-size: 20px; font-family: Ink Free"/> 
+                                <input type="reset" value="Törlés" style="font-size: 20px; font-family: Ink Free; margin-left: 20px"/>
+                            </p>
+                        </form>
+                    </div>
+                    <div style="height: 40px; width: 100%; margin: 40px 0px 20px 40px">
+                        Ezeket posztolták a emberek:
+                    </div>
+                </div>
+                <div id="posts" style="margin-left: 20px;  height: 60%; overflow: scroll; overflow-x: hidden">
+                    
+                    <table th:each="post : ${posts}" th:id="${post.user.id} + 'post' + ${post.id}" style="width: 80%; max-width: 600px; margin: 0px 40px 40px 40px; 
+                           border-radius: 10px; box-shadow: 5px 5px 3px 3px #006400A3">
+                        <tr>
+                            <td th:text="${post.user.name}" 
+                                style="background-color: white; width: 80%; padding: 5px; padding-left: 10px; border-top-left-radius: 10px; font-weight: bold; cursor: pointer"
+                                th:onclick="|window.location.href='/profil/${user.id}/${post.user.id}'|"></td>
+                            <td th:text="${post.date}" 
+                                style="background-color: white; padding: 5px; padding-right: 10px; border-top-right-radius: 10px; font-size: 14px"></td>
+                        </tr>
+                        <tr>
+                            <td th:text="${post.text}" style="background-color: white; width: 80%; padding: 20px; border-bottom-left-radius: 10px"></td>
+                            <td th:id="'post' + ${post.id}" style="margin-top: 10px">
+                                <button th:onclick="|window.location.href='/like/${post.id}/${user.id}'|" 
+                                        style="font-size: 16px; font-family: Ink Free; font-weight: bold; margin-left: auto; margin-right: auto">
+                                    Tetszik
+                                </button>
+                                <script th:inline="javascript">
+
+                                    var post = /*[[${post}]]*/ '';
+                                    createDeleteButton(post);
+
+                                </script>
+                                <div class="popup" th:attr="onclick='openPopup(' + ${post.id} + ')'"
+                                     style="position: relative; cursor: pointer; user-select: none; font-size: 16px; margin-top: 10px"><div th:id='${post.id} + popupWrap'>Akiknek tetszik:</div>
+                                    <span class="popuptext" th:id='${post.id} + myPopup'>izeke</span>
+                                </div>
+                                <script th:inline="javascript">
+                                    
+                                    var postId = /*[[${post.id}]]*/ 0;
+                                    var likes = /*[[${post.likes}]]*/ [];
+                                    var count = 0;
+                                    while (likes[count] !== 0) count++;
+                                    document.getElementById(postId + 'popupWrap').innerText = count + " embernek tetszik.";
+                                    
+                                </script>
+                            </td>
+                        </tr>
+                    </table>
+                    <script th:inline="javascript">
+                        function openPopup(postId) {
+                          var posts = /*[[${posts}]]*/ [];
+                          var post;
+                          for (i = 0; i < posts.length; i++) if (posts[i].id === postId) post = posts[i];
+                          var popup = document.getElementById(postId + 'myPopup');
+                          popup.textContent = "Ezt még senki nem kedvelte.";
+                          var likes = post.likes;
+                          var users = /*[[${users}]]*/ [];
+                          if (likes[0] !== 0){
+                              popup.textContent = "";
+                              for (x = 0; x < likes.length; x++) {
+                                  for (y = 0; y < users.length; y++) {
+                                      if (users[y].id === likes[x]) popup.textContent += users[y].username + '\r\n';
+                                  }
+                              };
+                          };
+                          popup.classList.toggle("show");
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

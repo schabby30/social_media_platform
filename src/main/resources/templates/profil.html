@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <title>Ez vagy te</title>
+        <script type="text/javascript" th:src="@{/app.js}"></script>
+        <script type="text/javascript" th:src="@{/upload.js}" defer></script>
+        <script type="text/javascript" th:src="@{/change_data.js}" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    </head>
+    <body>
+        <div style="height: 99vh; width: 100%; min-width: 1020px; background-color: #00b0000f; font-family: Ink Free; font-size: 22px">
+            <div style="width:25%; min-width: 240px; height: 100%; float:left; border-right: solid; border-width: 1px; text-align: center">
+                <div style="border-bottom: solid; border-width: 1px; margin: 20px 0px 20px 0px; padding: 20px">
+                    <img id="newsfeed_picture" src="/css/paprika.jpg" alt="paprika" width="150px" height="120px" style="display:block; margin-left:auto; margin-right: auto;"/>
+                    <a th:href="@{/newsfeed/{user_id}(user_id=${user.id})}">Vissza a Hírfolyóra</a>
+                </div>
+                <div style="width: 100%; margin: 20px 0px 20px 0px; padding: 20px; font-weight: bold">
+                    Online emberek
+                    <table style="margin: 20px auto 20px auto; padding: 20px; font-weight: normal; border-collapse: separate; border-spacing: 10px 15px">
+                        <tr style="display:none">
+                            <td id="userId" th:text="${user.id}"></td>
+                        </tr>
+                        <tr th:each="u : ${users}">
+                            <td th:text="${u.name}" style="margin: 50px; padding: 10px; background-color: #1ab01a30; border-radius: 10px; box-shadow: 3px 3px 5px 3px  #006400A3" 
+                                th:onclick="|window.location.href='/profil/${user.id}/${u.id}'|"></td>
+                            <td th:id="${u.username}">
+                                <script th:inline="javascript">
+
+                                    var from = /*[[${user.id}]]*/ '';
+                                    var to = /*[[${u.id}]]*/ '';
+                                    var tagId = /*[[${u.username}]]*/ '';
+                                    createChatButton(from, to, tagId);
+
+                                </script>
+                            </td>
+                        </tr>
+                    </table>
+                    <div id="chatRequest"></div>
+                </div>
+                <div id="invite"></div>
+            </div>
+            <div style="width:70%; min-width: 750px; height: 95vh; float:right">
+                <div style="padding-top: 20px; min-height: 315px">
+                    <div style="display: inline-block; width: 80%; min-width: 560px">
+                        <div style="width: 60%; display: inline-block">
+                            <table style="margin-left:auto; margin-right: auto">
+                                <tr style="text-align: center">
+                                    <td id="userName" th:text="${user.name}" style="font-size: 26px; font-weight: bold"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img id="profile_picture" th:src="${user.picture}" alt="profilkép" width="300px" height="250px" 
+                                            style="margin-left:auto; margin-right: auto"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+                        <div id="data" style="width: 35%; display: inline-block; margin-left: 20px; margin-top: 20%; float: right">
+                            <button id="changePictureButton" onclick="uploadFunction()" 
+                                    style="font-size: 22px; font-family: Ink Free">
+                                Profilkép módosítása
+                            </button>
+                            <script th:inline="javascript">
+
+                                function uploadFunction() {
+
+                                    var x = document.createElement("INPUT");
+                                    var userName = '"' + /*[[${user.username}]]*/ '';
+                                    var userId = /*[[${user.id}]]*/ '';
+                                    userName = userName + '"';
+
+                                    x.setAttribute("type", "file");
+                                    x.setAttribute("name", "files[]");
+                                    x.setAttribute("multiple", "");
+                                    x.setAttribute("id", "picture_to_upload")
+                                    document.getElementById("data").appendChild(x);
+
+                                    var x = document.createElement("BUTTON");
+                                    x.setAttribute("onClick", "upload(" + userName + "," + userId + ")");
+                                    x.setAttribute("id", "uploadButton")
+                                    document.getElementById("data").appendChild(x);
+
+                                    var label = document.createElement("label");
+                                    label.textContent = "Upload picture";
+                                    document.getElementById("uploadButton").appendChild(label);
+                                }
+
+                            </script>
+                        </div>
+                    </div>
+                    <div style="display: inline-block; height: 20px; width: 10%; text-align: right; margin-right:30px; float: right">
+                        <a th:href="@{/logout?id={user_id} (user_id=${user.id})}" style="display: block; float: right">Kilépek</a>
+                    </div>
+                </div>
+                <div style="font-size: 22px; text-align: center; margin-top: 10px">
+                    Ezek a adataid: <br></br>
+                    <div style="min-width: 610px">
+                        <div style="display:inline-block; min-width: 25%; width: fit-content; text-align: right">
+                            <label style="display:inherit; min-width: 150px; padding: 10px; margin: 0px 15px 15px 0px; font-weight: bold; 
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3">Felhasználói neved :</label><br>
+                            <label style="display:inherit; min-width: 150px; text-align: right; padding: 10px; margin: 0px 15px 15px 0px; font-weight: bold; 
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3">Jelszavad :</label><br>
+                            <label style="display:inherit; min-width: 150px; text-align: right; padding: 10px; margin: 0px 15px 15px 0px; font-weight: bold; 
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3">Teljes neved :</label><br>
+                            <label style="display:inherit; min-width: 150px; text-align: right; padding: 10px; margin: 0px 15px 15px 0px; font-weight: bold; 
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3">Életkorod :</label>
+                            
+                        </div>
+                        <div style="display:inline-block; min-width: 25%; width: fit-content; text-align: left">
+                            <label id="username_label" th:text="${user.username}" style="display: inline-block; padding: 10px; margin: 0px 15px 15px 0px; 
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3"></label>
+                            <input id="username_input" type="text" style="display: none; padding: 10px; margin: 0px 15px 15px 0px; font-size: 22px;
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3" maxlength="15" required/>
+                            <br>
+                            <label id="password_label" style="display: inline-block; padding: 10px; margin: 0px 15px 15px 0px; 
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3">&#42;&#42;&#42;</label>
+                            <input id="password_input" type="text" style="display: none; padding: 10px; margin: 0px 15px 15px 0px; font-size: 22px;
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3" maxlength="15" required/>
+                            <br>
+                            <label id="name_label" th:text="${user.name}" style="display: inline-block; padding: 10px; margin: 0px 15px 15px 0px; 
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3"></label>
+                            <input id="name_input" type="text" style="display: none; padding: 10px; margin: 0px 15px 15px 0px; font-size: 22px; 
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3" maxlength="25" required/>
+                            <br>
+                            <label id="age_label" th:text="${user.age}" style="display: inline-block; padding: 10px; margin: 0px 15px 15px 0px; 
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3"></label>
+                            <input id="age_input" type="number" min="1" max="99" style="display: none; padding: 10px; margin: 0px 15px 15px 0px; font-size: 22px;
+                                   background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3" required/>
+                            
+                        </div>
+                        <div style="display:inline-block; min-width: 25%; width: fit-content">
+                            <button id="change_username" onclick="change_username()" style="font-size: 22px; font-family: Ink Free">Megváltoztatom</button><br></br>
+                            <button id="change_password" onclick="change_password()" style="font-size: 22px; font-family: Ink Free">Megváltoztatom</button><br></br>
+                            <button id="change_name" onclick="change_name()" style="font-size: 22px; font-family: Ink Free">Megváltoztatom</button><br></br>
+                            <button id="change_age" onclick="change_age()" style="font-size: 22px; font-family: Ink Free">Megváltoztatom</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

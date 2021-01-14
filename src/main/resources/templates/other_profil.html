@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <title>A profil</title>
+        <script type="text/javascript" th:src="@{/app.js}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    </head>
+    <body>
+        <div style="height: 99vh; width: 100%; min-width: 1020px; background-color: #00b0000f; font-family: Ink Free; font-size: 22px">
+            <div style="width:25%; min-width: 240px; height: 100%; float:left; border-right: solid; border-width: 1px; text-align: center">
+                <div style="border-bottom: solid; border-width: 1px; margin: 20px 0px 20px 0px; padding: 20px">
+                    <img id="newsfeed_picture" src="/css/paprika.jpg" alt="paprika" width="150px" height="120px" style="display:block; margin-left:auto; margin-right: auto;"/>
+                    <a th:href="@{/newsfeed/{user_id}(user_id=${me.id})}">Vissza a Hírfolyóra</a>
+                </div>
+                <div style="width: 100%; margin: 20px 0px 20px 0px; padding: 20px; font-weight: bold">
+                    Online emberek
+                    <table style="margin: 20px auto 20px auto; padding: 20px; font-weight: normal; border-collapse: separate; border-spacing: 10px 15px">
+                        <tr style="display:none">
+                            <td id="userId" th:text="${user.id}"></td>
+                        </tr>
+                        <tr th:each="u : ${users}">
+                            <td th:text="${u.name}" style="margin: 50px; padding: 10px; background-color: #1ab01a30; border-radius: 10px; box-shadow: 3px 3px 5px 3px  #006400A3" 
+                                th:onclick="|window.location.href='/profil/${me.id}/${u.id}'|"></td>
+                            <td th:id="${u.username}">
+                                <script th:inline="javascript">
+
+                                    var from = /*[[${me.id}]]*/ '';
+                                    var to = /*[[${u.id}]]*/ '';
+                                    var tagId = /*[[${u.username}]]*/ '';
+                                    createChatButton(from, to, tagId);
+
+                                </script>
+                            </td>
+                        </tr>
+                    </table>
+                    <div id="chatRequest"></div>
+                </div>
+                <div id="invite"></div>
+            </div>
+            
+            <div style="width:70%; min-width: 750px; height: 95vh; float:right">
+                <div style="padding-top: 20px; min-height: 315px">
+                    <div style="display: inline-block; width: 80%; min-width: 560px">
+                        <div style="display: inline-block; width: 90%">
+                            <table style="margin-left:auto; margin-right: auto">
+                                <tr style="text-align: center">
+                                    <td id="userName" th:text="${user.name}" style="font-size: 32px"></td>
+                                </tr>
+                                <tr style="text-align: center">
+                                    <td style="font-size: 26px">profilja</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img id="profile_picture" th:src="${user.picture}" alt="profilkép" width="300px" height="250px" 
+                                            style="margin-left:auto; margin-right: auto"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div style="display: inline-block; height: 20px; width: 10%; text-align: right; margin-right:30px; float: right">
+                        <a th:href="@{/logout?id={user_id} (user_id=${me.id})}" style="display: block; float: right">Kilépek</a>
+                    </div>
+                </div>
+                <div style="font-size: 22px; text-align: center; margin-top: 10px; width: 80%; float: left">
+                    
+                    <div style="width: 90%; float: left">
+                        Ezek a adatai: <br></br>
+                        <div style="display:inline-block; min-width: 25%; width: fit-content; text-align: right">
+                            <label style="min-width: 150px; padding-right: 20px">Felhasználói név :</label><br></br>
+                            <label style="min-width: 150px; text-align: right; padding-right: 20px">Teljes név :</label><br></br>
+                            <label style="min-width: 150px; text-align: right; padding-right: 20px">Életkor :</label>
+                        </div>
+                        <div style="display:inline-block; min-width: 25%; width: fit-content; text-align: left">
+                            <label id="username_label" th:text="${user.username}" style="display: block"></label>
+                            <br>
+                            <label id="name_label" th:text="${user.name}" style="display: block"></label>
+                            <br>
+                            <label id="age_label" th:text="${user.age}" style="display: block"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

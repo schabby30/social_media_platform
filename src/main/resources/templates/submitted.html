@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <title>Submitted</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body style="height: 90vh; background-color: #00b0000f; font-family: Ink Free; font-size: 26px; min-width: 860px">
+        <div style="width: 50%; min-width: 400px; height: 90vh; float:left; text-align: center">
+            <img src="/css/paprika.jpg" alt="paprika" width="400px" height="350px" 
+                 style="display:block; margin-top:20vh; margin-left: auto; margin-right: auto; min-width: 400px; min-height: 350px;
+                     background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3"/>
+            Paprikázó közösségi oldal
+        </div>
+        <div style="width:50%; float:right; margin-top: 200px">
+            <div style="padding: 30px; width: fit-content; background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3">
+                <h1>Üdv a klubban, kedves</h1>
+                <p th:text="${user.name}" />
+                <a href="/">Lépjél be!</a>
+            </div>
+        </div>
+    </body>
+</html>

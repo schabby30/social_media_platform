@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <title>Paprikázó</title>
+    </head>
+    <body style="height: 90vh; background-color: #00b0000f; font-family: Ink Free; font-size: 22px; min-width: 800px">
+        <div>
+            <div style="width: 50%; min-width: 400px; float:left; text-align: center">
+                <img src="/css/paprika.jpg" alt="paprika" width="300px" height="250px" 
+                     style="display:block; margin-top:20vh; margin-left: auto; margin-right: auto;
+                     background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3"/>
+                Paprikázó közösségi oldal
+            </div>
+            <div style="width:50%; min-width: 400px; float:right; margin-top: 10vh">
+                <div style="max-width: 500px; padding: 30px; margin: 10px; background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px #006400A3">
+                    <h1 style="font-size: 32px">Aggyad a belépési azonosítókat megfele!</h1>
+                    <form action="#" th:action="@{/}" th:object="${user}" method="POST">
+                        <p>Felhasználói neved: <input type="text" th:field="*{username}" style="height: 32px; width: 40%; padding: 5px; 
+                                                      font-family: Ink Free; font-size: 22px; font-weight: bold"/></p>
+                        <p>Jelszód: <input type="text" th:field="*{password}" style="height: 32px; width: 40%; padding: 5px; 
+                                           font-family: Ink Free; font-size: 22px; font-weight: bold"/></p>
+                        <p>
+                            <input type="submit" value="Submit" style="font-family: Ink Free; font-size: 26px"/>
+                            <input type="reset" value="Reset" style="font-family: Ink Free; font-size: 26px"/>
+                        </p>
+                    </form>
+                </div>
+                <div style="margin: 30px 10px 10px 10px; padding: 20px; width: fit-content; 
+                     background-color: #1ab01a30; border-radius: 10px; box-shadow: 5px 5px 5px 3px  #006400A3">
+                    Új vagyok még itt,
+                    <a href="/sign_up">REGISZTRÁLOK</a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
